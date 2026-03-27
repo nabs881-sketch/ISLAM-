@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ma Foi - Checklist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+        .tab-active { border-bottom: 3px solid #10b981; color: #10b981; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen pb-20">
+
+    <header class="bg-emerald-600 text-white p-6 sticky top-0 z-10 shadow-md">
+        <h1 class="text-2xl font-bold">Ma Discipline 🌙</h1>
+        <p class="text-emerald-100 text-sm">Aujourd'hui, je fais de mon mieux.</p>
+    </header>
+
+    <nav class="flex justify-around bg-white shadow-sm sticky top-[80px] z-10">
+        <button onclick="switchLevel(1)" id="tab1" class="p-4 text-sm font-bold tab-active">NIV 1</button>
+        <button onclick="switchLevel(2)" id="tab2" class="p-4 text-sm font-bold text-gray-400">NIV 2</button>
+        <button onclick="switchLevel(3)" id="tab3" class="p-4 text-sm font-bold text-gray-400">NIV 3</button>
+        <button onclick="switchLevel(4)" id="tab4" class="p-4 text-sm font-bold text-gray-400">NIV 4</button>
+    </nav>
+
+    <main class="p-4 max-w-md mx-auto space-y-6">
+        
+        <div id="content" class="space-y-4">
+            </div>
+
+        <button onclick="resetDaily()" class="w-full mt-10 py-3 border-2 border-red-200 text-red-500 rounded-xl font-medium active:bg-red-50 transition">
+            Réinitialiser ma journée
+        </button>
+    </main>
+
+    <script>
+        const levels = {
+            1: [
+                { id: 'prieres', text: 'Les 5 prières obligatoires', type: 'check' },
+                { id: 'kursi', text: 'Ayat al-Kursi (après prière)', type: 'check' },
+                { id: 'ikhlass', text: '3x Sourate Ikhlass', type: 'check' },
+                { id: 'merci', text: 'Remercier Allah avant de dormir', type: 'check' }
+            ],
+            2: [
+                { id: 'mosquee', text: 'Prière à la Mosquée', type: 'check' },
+                { id: 'istighfar', text: 'Istighfar (100x)', type: 'counter', max: 100 },
+                { id: 'tasbih', text: 'Tasbih (33x3)', type: 'counter', max: 99 },
+                { id: 'coran_nuit', text: 'Écouter Coran en dormant', type: 'check' }
+            ],
+            3: [
+                { id: 'hadiths', text: 'Lire 3 Hadiths', type: 'check' },
+                { id: 'prophete', text: 'Vie du Prophète (Vidéo/Livre)', type: 'check' },
+                { id: 'podcast', text: 'Podcast Islam Simplement', type: 'check' },
+                { id: 'sunna', text: 'Prières surérogatoires', type: 'check' }
+            ],
+            4: [
+                { id: 'aumone', text: 'Faire une aumône (Sadaqa)', type: 'check' },
+                { id: 'tweet', text: 'Publier un Tweet Islam', type: 'check' },
+                { id: 'douaas', text: 'Temps de Douaas personnels', type: 'check' }
+            ]
+        };
+
+        let currentLevel = 1;
+
+        function render() {
+            const container = document.getElementById('content');
+            container.innerHTML = '';
+            
+            levels[currentLevel].forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-5 rounded-2xl shadow-sm flex items-center justify-between border border-gray-100";
+                
+                let actionHtml = '';
+                if(item.type === 'check') {
+                    const checked = localStorage.getItem(item.id) === 'true' ? 'checked' : '';
+                    actionHtml = `<input type="checkbox" onchange="toggleCheck('${item.id}')" ${checked} class="w-7 h-7 accent-emerald-500">`;
+                } else {
+                    const count = localStorage.getItem(item.id) || 0;
+                    actionHtml = `
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold text-emerald-600">${count}/${item.max}</span>
+                            <button onclick="increment('${item.id}', ${item.max})" class="bg-emerald-100 text-emerald-600 w-10 h-10 rounded-full font-bold">+</button>
+                        </div>`;
+                }
+
+                card.innerHTML = `<span class="font-medium text-gray-700">${item.text}</span> ${actionHtml}`;
+                container.appendChild(card);
+            });
+        }
+
+        function switchLevel(lvl) {
+            currentLevel = lvl;
+            document.querySelectorAll('nav button').forEach(b => b.className = "p-4 text-sm font-bold text-gray-400");
+            document.getElementById('tab'+lvl).className = "p-4 text-sm font-bold tab-active";
+            render();
+        }
+
+        function toggleCheck(id) {
+            const val = localStorage.getItem(id) === 'true';
+            localStorage.setItem(id, !val);
+        }
+
+        function increment(id, max) {
+            let count = parseInt(localStorage.getItem(id) || 0);
+            if(count < max) {
+                localStorage.setItem(id, count + 1);
+                render();
+            }
+        }
+
+        function resetDaily() {
+            if(confirm("Effacer la progression du jour ?")) {
+                localStorage.clear();
+                render();
+            }
+        }
+
+        render();
+    </script>
+</body>
+</html>
